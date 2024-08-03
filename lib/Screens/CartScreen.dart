@@ -107,7 +107,23 @@ class _CartScreenState extends State<CartScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cart'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+         title: Center(
+          child: Text("Giỏ Hàng"),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.shopping_cart_sharp, size: 22),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CartScreen(userId: "A"),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: FutureBuilder<List<CartItem>>(
         future: _cartItemsFuture,

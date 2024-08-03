@@ -10,6 +10,7 @@ import 'package:shoesapp/Data/ImagePoduct_reader.dart';
 import 'package:shoesapp/Component/Product_Image.dart';
 import 'package:shoesapp/Component/NavBottomDetail.dart';
 import 'package:shoesapp/Data/carts_reader.dart';
+import 'package:shoesapp/Screens/CartScreen.dart';
 
 
 class detail_screen extends StatefulWidget {
@@ -177,6 +178,17 @@ class _detail_screenState extends State<detail_screen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.product.Name),
+        actions: [IconButton(
+            icon: const Icon(Icons.shopping_cart_sharp, size: 22),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CartScreen(userId: "A"),
+                ),
+              );
+            },
+          ),],
       ),
       body: RefreshIndicator(
         onRefresh: _refreshData,
@@ -229,7 +241,7 @@ class _detail_screenState extends State<detail_screen> {
                 ],
               ),
             ),
-            back_to_top_button(scrollController: _scrollController),
+            BackToTopButton(scrollController: _scrollController),
           ],
         ),
       ),

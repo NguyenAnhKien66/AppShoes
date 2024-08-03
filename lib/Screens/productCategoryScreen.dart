@@ -5,10 +5,11 @@ import 'package:shoesapp/Component/DialogFillter.dart';
 import 'package:shoesapp/Component/ProductList.dart';
 import 'package:shoesapp/Screens/FavoritesScreen.dart';
 import 'package:shoesapp/Screens/HomeScreen.dart';
+import 'package:shoesapp/Screens/NotificationScreen.dart';
 import 'package:shoesapp/Screens/SearchScreen.dart';
 
 class ProductCategoryScreen extends StatefulWidget {
-  final String? searchTerm; // Nullable search term parameter
+  final String? searchTerm; 
 
   ProductCategoryScreen({this.searchTerm});
 
@@ -58,7 +59,7 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> with Sing
           ),
         );
         break;
-      case 3:
+      case 4:
         // Navigator.pushReplacement(
         //   context,
         //   MaterialPageRoute(
@@ -66,13 +67,13 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> with Sing
         //   ),
         // );
         break;
-      case 4:
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => NotificationsScreen(),
-        //   ),
-        // );
+      case 3:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => NotificationScreen(userId: 'A',),
+          ),
+        );
         break;
     }
   }

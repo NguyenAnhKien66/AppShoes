@@ -3,7 +3,8 @@ import 'package:shoesapp/Component/CustomBottomNav.dart';
 import 'package:shoesapp/Component/ItemFavorites.dart';
 import 'package:shoesapp/Data/Products_reader.dart';
 import 'package:shoesapp/Screens/CartScreen.dart';
-import 'package:shoesapp/Screens/HomeScreen.dart'; 
+import 'package:shoesapp/Screens/HomeScreen.dart';
+import 'package:shoesapp/Screens/NotificationScreen.dart'; 
 import 'package:shoesapp/Screens/ProductCategoryScreen.dart'; 
 
 class FavoriteScreen extends StatefulWidget {
@@ -49,7 +50,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
           ),
         );
         break;
-      case 3:
+      case 4:
         // Navigator.pushReplacement(
         //   context,
         //   MaterialPageRoute(
@@ -57,13 +58,13 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         //   ),
         // );
         break;
-      case 4:
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => NotificationsScreen(),
-        //   ),
-        // );
+      case 3:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => NotificationScreen(userId: 'A',),
+          ),
+        );
         break;
     }
   }

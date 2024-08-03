@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:shoesapp/Component/BackToTopButton.dart';
 import 'package:shoesapp/Component/PanelHome.dart';
 import 'package:shoesapp/Component/HorizontalProductList.dart';
 import 'package:shoesapp/Data/Products_reader.dart';
 import 'package:shoesapp/Screens/CartScreen.dart';
 import 'package:shoesapp/Screens/FavoritesScreen.dart';
+import 'package:shoesapp/Screens/NotificationScreen.dart';
 import 'package:shoesapp/Screens/ProductCategoryScreen.dart';
 import 'package:shoesapp/Component/CustomBottomNav.dart';
 import 'package:shoesapp/Screens/SearchScreen.dart'; 
@@ -19,7 +21,14 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-
+  final ScrollController _scrollController = ScrollController();
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_scrollListener);
+  }
+  void _scrollListener() {
+    setState(() {});
+  }
   void _onItemTapped(int index) {
     if (_selectedIndex == index) return;
     setState(() {
@@ -51,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
         break;
-      case 3:
+      case 4:
         // Navigator.pushReplacement(
         //   context,
         //   MaterialPageRoute(
@@ -59,13 +68,13 @@ class _HomeScreenState extends State<HomeScreen> {
         //   ),
         // );
         break;
-      case 4:
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => NotificationsScreen(),
-        //   ),
-        // );
+      case 3:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => NotificationScreen(userId: 'A',),
+          ),
+        );
         break;
     }
   }
@@ -129,6 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Expanded(
             child: SingleChildScrollView(
+              controller: _scrollController,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -160,8 +170,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
+            
           ),
+          BackToTopButton(scrollController: _scrollController),
         ],
+        
       ),
       bottomNavigationBar: CustomBottomAppBar(
         selectedIndex: _selectedIndex,

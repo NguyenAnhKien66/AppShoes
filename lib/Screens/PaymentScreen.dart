@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import 'package:shoesapp/Data/Products_reader.dart';
 import 'package:shoesapp/Data/carts_reader.dart';
 
@@ -31,7 +32,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
     _cartService = CartService(widget.userId);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Payment'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+         title: const Center(
+          child: Text("Thanh toán"),
+        ),
       ),
       body: Column(
         children: [
@@ -139,7 +143,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
 
   void _handlePayment() async {
+    final DateFormat dateFormat = DateFormat('dd/MM/yyyy h:mm:ss a');
+  final String formattedTime = dateFormat.format(DateTime.now());
   final invoiceData = {
+    'invoiceId':"",
     'userId': widget.userId,
     'items': widget.selectedItems.map((item) => {
       'idProduct':item.productId,
@@ -155,27 +162,35 @@ class _PaymentScreenState extends State<PaymentScreen> {
     'paymentMethod': _isBankTransfer ? 'Bank Transfer' : 'Cash',
     'voucher': _voucher,
     'Status': status,
-    'shippingCost': _shippingCost,
-    'totalAmountDue': widget.selectedItems.fold(0.0, (sum, item) => sum + double.parse(item.price) * item.quantity) + _shippingCost - 0.0,
+    'time': formattedTime,
+    
+    'shippingCost': (_shippingCost).toString(),
+    'totalAmountDue': (widget.selectedItems.fold(0.0, (sum, item) => sum + double.parse(item.price) * item.quantity) + _shippingCost - 0.0).toString(),
   };
 
   final firestore = FirebaseFirestore.instance;
 
   try {
-    // Add invoice to 'Invoices' collection
-    await firestore.collection('Invoices').add(invoiceData);
+  // Add invoice to 'Invoices' collection and get document reference
+      DocumentReference invoiceRef = await firestore.collection('Invoices').add(invoiceData);
 
-    // Reduce the quantity of each product in the inventory
-    for (var item in widget.selectedItems) {
-      await products.updateQuantityProduct(item.productId, item.size, item.quantity);
-      await _cartService.removeItemFromCart(item.id);
+      // Get the document ID
+      final invoiceId = invoiceRef.id;
+
+      // Optionally, you can update the document with additional information if needed
+      await invoiceRef.update({'invoiceId': invoiceId});
+
+      // Reduce the quantity of each product in the inventory
+      for (var item in widget.selectedItems) {
+        await products.updateQuantityProduct(item.productId, item.size, item.quantity);
+        await _cartService.removeItemFromCart(item.id);
+      }
+
+      // Navigate back after successful payment and stock update
+      Navigator.pop(context, true);
+    } catch (e) {
+      print('Error handling payment: $e');
     }
 
-    // Navigate back after successful payment and stock update
-    Navigator.pop(context, true);
-  } catch (e) {
-    print('Error handling payment: $e');
   }
-}
-
 }
