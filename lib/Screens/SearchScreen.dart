@@ -3,6 +3,9 @@ import 'package:shoesapp/Data/shared_prefs_manager.dart';
 import 'package:shoesapp/Screens/productCategoryScreen.dart';
 
 class SearchScreen extends StatefulWidget {
+   final String userId;
+
+  const SearchScreen({super.key, required this.userId}); 
   @override
   _SearchScreenState createState() => _SearchScreenState();
 }
@@ -11,7 +14,7 @@ class _SearchScreenState extends State<SearchScreen> {
   TextEditingController _searchController = TextEditingController();
   List<String> _hotKeywords = ['Giày sandal', 'Dép', 'Phụ kiện']; 
   List<String> _searchHistory = [];
-
+  String userId = SharedPrefsManager.getUserId();
   @override
   void initState() {
     super.initState();
@@ -21,7 +24,7 @@ class _SearchScreenState extends State<SearchScreen> {
   void _loadSearchHistory() async {
     await SharedPrefsManager.init();
     setState(() {
-      _searchHistory = SharedPrefsManager.getSearchKeywords();
+      _searchHistory = SharedPrefsManager.getSearchKeywords(userId);
     });
   }
 

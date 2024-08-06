@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:shoesapp/Data/shared_prefs_manager.dart';
 class products {
   String Id;
   String Name;
@@ -17,7 +17,7 @@ class products {
   String Size44;
   String Size45;
   String Trend;
-  bool Favorites;
+  
   String Sex;
   
 
@@ -38,16 +38,14 @@ class products {
     required this.Size44,
     required this.Size45,
     required this.Trend,
-    required this.Favorites,
     required this.Sex
   });
-
+  String userId = SharedPrefsManager.getUserId();
   // Constructor từ JSON
   products.fromJson(Map<String, dynamic> json)
       : Id = json["Id"] ?? '',
         Name = json['Name'] ?? '',
         Status = json['Status'] ?? false,
-        Favorites = json['Favorites'] ?? false,
         Catelory = json["Catelory"] ?? '',
         Discount = json["Discount"] ?? '',
         Image = json["Image"] ?? '',
@@ -79,7 +77,23 @@ class products {
   //     return [];
   //   }
   // }
+static Future<List<products>> loadProductsByIds(List<String> productIds) async {
+    try {
+      CollectionReference productCollection = FirebaseFirestore.instance.collection('Products');
 
+      // Tạo truy vấn để lấy các sản phẩm theo ID
+      QuerySnapshot productSnapshot = await productCollection
+          .where(FieldPath.documentId, whereIn: productIds)
+          .get();
+
+      return productSnapshot.docs
+          .map((doc) => products.fromJson(doc.data() as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      print('Error loading products by IDs from Firestore: $e');
+      return [];
+    }
+  }
   // Tải sản phẩm bán chạy
   static Future<List<products>> loadBestSellingProducts() async {
     try {
@@ -145,43 +159,8 @@ class products {
       return [];
     }
   }
-  // phương thức tải sản phẩm yêu thích
-static Future<List<products>> loadFavoriteProducts() async {
-  try {
-    CollectionReference productCollection =
-        FirebaseFirestore.instance.collection('Products');
 
-    QuerySnapshot productSnapshot = await productCollection
-        .where('Favorites', isEqualTo: true)
-        .get();
 
-    return productSnapshot.docs
-        .map((doc) => products.fromJson(doc.data() as Map<String, dynamic>))
-        .toList();
-  } catch (e) {
-    print('Error loading favorite products from Firestore: $e');
-    return [];
-  }
-}
-// Cập nhật trạng thái Favorites
-  Future<void> updateFavoriteStatus(bool isFavorite) async {
-    try {
-      CollectionReference productCollection = FirebaseFirestore.instance.collection('Products');
-      await productCollection.doc(Id).update({'Favorites': isFavorite});
-      print('Favorite status updated successfully.');
-    } catch (e) {
-      print('Error updating favorite status: $e');
-    }
-  }
-   static Future<products> loadProductById(String id) async {
-    try {
-      DocumentSnapshot productDoc = await FirebaseFirestore.instance.collection('Products').doc(id).get();
-      return products.fromJson(productDoc.data() as Map<String, dynamic>);
-    } catch (e) {
-      print('Error loading product by ID: $e');
-      rethrow;
-    }
-  }
   static Future<void> updateQuantityProduct(String productId, String size, int quantity) async {
     try {
       DocumentReference productRef = FirebaseFirestore.instance.collection('Products').doc(productId);

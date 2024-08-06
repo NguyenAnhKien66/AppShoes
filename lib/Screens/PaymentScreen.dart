@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:shoesapp/Data/Products_reader.dart';
 import 'package:shoesapp/Data/carts_reader.dart';
+import 'package:shoesapp/Screens/ChangeAddress.dart';
 
 class PaymentScreen extends StatefulWidget {
   final List<CartItem> selectedItems;
@@ -17,23 +18,41 @@ class PaymentScreen extends StatefulWidget {
 class _PaymentScreenState extends State<PaymentScreen> {
   final TextEditingController _addressController = TextEditingController();
   bool _isBankTransfer = false;
-  bool _isCash = false;
+  bool _isCash = true; 
   String _voucher = '';
   double _shippingCost = 10.0; 
   late CartService _cartService;
-  bool status =false;
-  
+
+  @override
+  void initState() {
+    super.initState();
+    _cartService = CartService(widget.userId);
+    _loadUserAddress(); 
+  }
+
+  Future<void> _loadUserAddress() async {
+    final userId = widget.userId;
+    try {
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+      final address = userDoc.data()?['address'] ?? '';
+      setState(() {
+        _addressController.text = address;
+      });
+    } catch (e) {
+      print('Error loading address: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final totalPrice = widget.selectedItems.fold(0.0, (sum, item) => sum + double.parse(item.price) * item.quantity);
     final voucherDiscount = 0.0; 
     final totalAmountDue = totalPrice + _shippingCost - voucherDiscount;
-    _cartService = CartService(widget.userId);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-         title: const Center(
+        title: const Center(
           child: Text("Thanh toán"),
         ),
       ),
@@ -57,17 +76,43 @@ class _PaymentScreenState extends State<PaymentScreen> {
             ),
           ),
           // Address
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _addressController,
-              decoration: const InputDecoration(
-                labelText: 'Address',
-                border: OutlineInputBorder(),
+          Card(
+            margin: const EdgeInsets.all(16.0),
+            child: ListTile(
+              title: Text('Địa chỉ giao hàng'),
+              subtitle: Text(_addressController.text.isNotEmpty ? _addressController.text : 'Chưa có địa chỉ'),
+              trailing: TextButton(
+                onPressed: () async {
+                  final updated = await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ChangeAddress()),
+                  );
+
+                  if (updated == true) {
+                    
+                    _loadUserAddress();
+                  }
+                },
+                child: const Text('Đổi'),
               ),
+              onTap: () {
+                // Handle address display
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Địa chỉ giao hàng'),
+                    content: Text(_addressController.text.isNotEmpty ? _addressController.text : 'Chưa có địa chỉ'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('Đóng'),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
-          // Payment 
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
@@ -95,7 +140,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
               ],
             ),
           ),
-          // Voucher 
+          // Voucher
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: TextField(
@@ -110,7 +155,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
               ),
             ),
           ),
-          // Payment Details 
+          // Payment Details
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -131,7 +176,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
           child: ElevatedButton(
             onPressed: () {
               _handlePayment();
-
             },
             child: const Text('Pay Now'),
           ),
@@ -140,57 +184,51 @@ class _PaymentScreenState extends State<PaymentScreen> {
     );
   }
 
-
-
   void _handlePayment() async {
     final DateFormat dateFormat = DateFormat('dd/MM/yyyy h:mm:ss a');
-  final String formattedTime = dateFormat.format(DateTime.now());
-  final invoiceData = {
-    'invoiceId':"",
-    'userId': widget.userId,
-    'items': widget.selectedItems.map((item) => {
-      'idProduct':item.productId,
-      'id': item.id,
-      'name': item.name,
-      'price': item.price,
-      'quantity': item.quantity,
-      'size': item.size,
-      'imageUrl': item.imageUrl,
-      'Sex':item.sex,
-    }).toList(),
-    'address': _addressController.text,
-    'paymentMethod': _isBankTransfer ? 'Bank Transfer' : 'Cash',
-    'voucher': _voucher,
-    'Status': status,
-    'time': formattedTime,
-    
-    'shippingCost': (_shippingCost).toString(),
-    'totalAmountDue': (widget.selectedItems.fold(0.0, (sum, item) => sum + double.parse(item.price) * item.quantity) + _shippingCost - 0.0).toString(),
-  };
+    final String formattedTime = dateFormat.format(DateTime.now());
+    final invoiceData = {
+      'invoiceId':"",
+      'userId': widget.userId,
+      'items': widget.selectedItems.map((item) => {
+        'idProduct':item.productId,
+        'id': item.id,
+        'name': item.name,
+        'price': item.price,
+        'quantity': item.quantity,
+        'size': item.size,
+        'imageUrl': item.imageUrl,
+        'Sex':item.sex,
+      }).toList(),
+      'address': _addressController.text,
+      'paymentMethod': _isBankTransfer ? 'Bank Transfer' : 'Cash',
+      'voucher': _voucher,
+      'Status': false,
+      'time': formattedTime,
+      'move': false,
+      'finished':false,
+      'cancel':false,
+      'reInvoices':false,
+      'shippingCost': (_shippingCost).toString(),
+      'totalAmountDue': (widget.selectedItems.fold(0.0, (sum, item) => sum + double.parse(item.price) * item.quantity) + _shippingCost - 0.0).toString(),
+    };
 
-  final firestore = FirebaseFirestore.instance;
+    final firestore = FirebaseFirestore.instance;
 
-  try {
-  // Add invoice to 'Invoices' collection and get document reference
-      DocumentReference invoiceRef = await firestore.collection('Invoices').add(invoiceData);
+    try {
+        DocumentReference invoiceRef = await firestore.collection('Invoices').add(invoiceData);
 
-      // Get the document ID
-      final invoiceId = invoiceRef.id;
+        // Get the document ID
+        final invoiceId = invoiceRef.id;
+        await invoiceRef.update({'invoiceId': invoiceId});
 
-      // Optionally, you can update the document with additional information if needed
-      await invoiceRef.update({'invoiceId': invoiceId});
-
-      // Reduce the quantity of each product in the inventory
-      for (var item in widget.selectedItems) {
-        await products.updateQuantityProduct(item.productId, item.size, item.quantity);
-        await _cartService.removeItemFromCart(item.id);
+        for (var item in widget.selectedItems) {
+          await products.updateQuantityProduct(item.productId, item.size, item.quantity);
+          await _cartService.removeItemFromCart(item.id);
+        }
+        Navigator.pop(context, true);
+      } catch (e) {
+        print('Error handling payment: $e');
       }
-
-      // Navigate back after successful payment and stock update
-      Navigator.pop(context, true);
-    } catch (e) {
-      print('Error handling payment: $e');
-    }
-
   }
 }

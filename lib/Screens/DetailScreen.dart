@@ -10,7 +10,9 @@ import 'package:shoesapp/Data/ImagePoduct_reader.dart';
 import 'package:shoesapp/Component/Product_Image.dart';
 import 'package:shoesapp/Component/NavBottomDetail.dart';
 import 'package:shoesapp/Data/carts_reader.dart';
+import 'package:shoesapp/Data/shared_prefs_manager.dart';
 import 'package:shoesapp/Screens/CartScreen.dart';
+import 'package:shoesapp/Data/Favorites_reader.dart';
 
 
 class detail_screen extends StatefulWidget {
@@ -24,13 +26,14 @@ class detail_screen extends StatefulWidget {
 
 class _detail_screenState extends State<detail_screen> {
   late String _currentImage;
+  String userId = SharedPrefsManager.getUserId(); 
   List<String> _thumbnails = [];
   String _selectedSize = '39';
   String _quantity = '';
   final ScrollController _scrollController = ScrollController();
   final GlobalKey<ButtonSizeState> _buttonSizeKey = GlobalKey<ButtonSizeState>();
   bool _isFavorite = false;
-
+  late Favorites _favorites; 
   late CartService _cartService; 
 
   @override
@@ -39,43 +42,37 @@ class _detail_screenState extends State<detail_screen> {
     _currentImage = widget.product.Image;
     _loadThumbnails();
     _updateQuantity();
+    _favorites = Favorites(userId);
     _scrollController.addListener(_scrollListener);
-    _fetchFavoriteStatus();
-    _cartService = CartService('A'); // Khởi tạo CartService với userId mặc định là 'A'
+    _checkIfFavorite();
+    _cartService = CartService(userId); 
   }
 
   Future<void> _refreshData() async {
     await Future.wait([
-      _fetchFavoriteStatus(),
+  
       _loadThumbnails(),
     ] as Iterable<Future>);
   }
 
-  Future<void> _fetchFavoriteStatus() async {
-    try {
-      products product = await products.loadProductById(widget.product.Id);
-      setState(() {
-        _isFavorite = product.Favorites;
-      });
-    } catch (e) {
-      print('Error fetching favorite status: $e');
-    }
-  }
+  
 
   void _scrollListener() {
     setState(() {});
   }
 
-  Future<void> _addToFavorites() async {
+   Future<void> _addToFavorites() async { 
     try {
-      bool newFavoriteStatus = !_isFavorite;
-      await widget.product.updateFavoriteStatus(newFavoriteStatus);
+      if (_isFavorite) {
+        await _favorites.removeFromFavorites(widget.product.Id);
+      } else {
+        await _favorites.addToFavorites(widget.product.Id);
+      }
       setState(() {
-        _isFavorite = newFavoriteStatus;
+        _isFavorite = !_isFavorite;
       });
-      print('Product favorite status updated to $newFavoriteStatus.');
     } catch (e) {
-      print('Error updating favorite status: $e');
+      print('Lỗi khi thêm/xóa khỏi yêu thích: $e');
     }
   }
 
@@ -89,7 +86,7 @@ class _detail_screenState extends State<detail_screen> {
       productId: widget.product.Id,
       name: widget.product.Name,
       imageUrl: widget.product.Image,
-      price: double.parse(widget.product.Discount)>0?((double.parse(widget.product.Price) - (double.parse(widget.product.Price)*(double.parse(widget.product.Discount)/100.0)))).toString():widget.product.Discount,
+      price: double.parse(widget.product.Discount)>0?((double.parse(widget.product.Price) - (double.parse(widget.product.Price)*(double.parse(widget.product.Discount)/100.0)))).toString():widget.product.Price,
       quantity: quantity,
       size: size,
       sex: widget.product.Sex,
@@ -121,7 +118,12 @@ class _detail_screenState extends State<detail_screen> {
     print('Error adding product to cart: $e');
   }
 }
-
+ Future<void> _checkIfFavorite() async { 
+    final isFavorite = await _favorites.isFavorite(widget.product.Id);
+    setState(() {
+      _isFavorite = isFavorite;
+    });
+  }
 
   void _loadThumbnails() async {
     try {
@@ -184,7 +186,7 @@ class _detail_screenState extends State<detail_screen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => CartScreen(userId: "A"),
+                  builder: (context) => CartScreen(),
                 ),
               );
             },
@@ -245,13 +247,12 @@ class _detail_screenState extends State<detail_screen> {
           ],
         ),
       ),
+       
       bottomNavigationBar: nav_bottom_detail(
-        onAddToFavorites: _addToFavorites,
         onAddToCart: _addToCart,
-        isFavorite: _isFavorite,
-        cartService: _cartService,
-        product: widget.product,
+        onFavoriteToggle: _addToFavorites, isFavorite: _isFavorite,
       ),
+    
     );
   }
 }

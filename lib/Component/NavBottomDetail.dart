@@ -1,23 +1,16 @@
 import 'package:flutter/material.dart';
-
+import 'package:shoesapp/Data/Favorites_reader.dart';
 import 'package:shoesapp/Data/Products_reader.dart';
-import 'package:shoesapp/Data/carts_reader.dart'; // Đảm bảo rằng bạn đã import CartService
+import 'package:shoesapp/Data/carts_reader.dart';
 
 class nav_bottom_detail extends StatefulWidget {
-  final VoidCallback onAddToFavorites;
   final VoidCallback onAddToCart;
-  final bool isFavorite; // Trạng thái yêu thích
-  final CartService cartService; // Dịch vụ giỏ hàng để thêm sản phẩm vào giỏ hàng
-  final products product; // Thông tin sản phẩm để thêm vào giỏ hàng
+  final VoidCallback onFavoriteToggle;
+ final bool isFavorite;
 
   const nav_bottom_detail({
     super.key,
-    required this.onAddToFavorites,
-    required this.onAddToCart,
-    required this.isFavorite, // Khởi tạo trạng thái yêu thích
-    required this.cartService,
-    required this.product,
-  });
+    required this.onAddToCart, required this.onFavoriteToggle, required this.isFavorite});
 
   @override
   _nav_bottom_detailState createState() => _nav_bottom_detailState();
@@ -47,14 +40,11 @@ class _nav_bottom_detailState extends State<nav_bottom_detail> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            onPressed: () {
-              widget.onAddToFavorites();
-              setState(() {}); // Cập nhật giao diện sau khi nhấn nút
-            },
             icon: Icon(
-              widget.isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: widget.isFavorite ? Colors.red : null,
+              widget.isFavorite ? Icons.favorite : Icons.favorite_border, // THAY ĐỔI
+              color: widget.isFavorite ? Colors.red : Colors.grey, // THAY ĐỔI
             ),
+            onPressed: widget.onFavoriteToggle, // THAY ĐỔI
           ),
           ElevatedButton(
             onPressed: () {
@@ -83,3 +73,5 @@ class _nav_bottom_detailState extends State<nav_bottom_detail> {
     );
   }
 }
+
+

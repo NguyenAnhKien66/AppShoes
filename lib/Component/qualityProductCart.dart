@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class QualityProductCart extends StatefulWidget {
   final int initialQuantity;
   final int maxQuantity;
-  final void Function(int) onQuantityChanged; // Callback to update quantity in Firestore
+  final void Function(int) onQuantityChanged; 
 
   const QualityProductCart({
     super.key,
@@ -29,7 +29,7 @@ class _QualityProductCartState extends State<QualityProductCart> {
     if (_quantity < widget.maxQuantity) {
       setState(() {
         _quantity++;
-        widget.onQuantityChanged(_quantity); // Update quantity in Firestore
+        widget.onQuantityChanged(_quantity); 
       });
     }
   }
@@ -38,7 +38,7 @@ class _QualityProductCartState extends State<QualityProductCart> {
     if (_quantity > 1) {
       setState(() {
         _quantity--;
-        widget.onQuantityChanged(_quantity); // Update quantity in Firestore
+        widget.onQuantityChanged(_quantity); 
       });
     }
   }

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:shoesapp/Component/CustomBottomNav.dart'; 
-import 'package:shoesapp/Component/ItemFavorites.dart';
+import 'package:shoesapp/Component/CustomBottomNav.dart';
+import 'package:shoesapp/Component/ItemFavorite.dart'; 
+import 'package:shoesapp/Data/Favorites_reader.dart';
 import 'package:shoesapp/Data/Products_reader.dart';
+import 'package:shoesapp/Data/shared_prefs_manager.dart';
+import 'package:shoesapp/Screens/AccountScreen.dart';
 import 'package:shoesapp/Screens/CartScreen.dart';
 import 'package:shoesapp/Screens/HomeScreen.dart';
 import 'package:shoesapp/Screens/NotificationScreen.dart'; 
@@ -15,17 +18,20 @@ class FavoriteScreen extends StatefulWidget {
 }
 
 class _FavoriteScreenState extends State<FavoriteScreen> {
-  late Future<List<products>> _favoriteProducts;
   int _selectedIndex = 1; 
+  late Favorites _favorites; // Khai báo đối tượng Favorites
+  List<String> _favoriteProductIds = []; // Danh sách ID sản phẩm yêu thích
 
   @override
   void initState() {
     super.initState();
-    _favoriteProducts = products.loadFavoriteProducts();
+    String userId = SharedPrefsManager.getUserId();
+    _favorites = Favorites(userId); // Khởi tạo đối tượng Favorites
+    _loadFavoriteProductIds(); // Tải danh sách ID sản phẩm yêu thích
   }
 
   void _onItemTapped(int index) {
-     if (_selectedIndex == index) return;
+    if (_selectedIndex == index) return;
     setState(() {
       _selectedIndex = index;
     });
@@ -35,7 +41,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => HomeScreen( userId: "userId"), // Adjust parameters as needed
+            builder: (context) => HomeScreen(),
           ),
         );
         break;
@@ -50,23 +56,36 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
           ),
         );
         break;
-      case 4:
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => AccountScreen(),
-        //   ),
-        // );
-        break;
       case 3:
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => NotificationScreen(userId: 'A',),
+            builder: (context) => NotificationScreen(),
+          ),
+        );
+        break;
+      case 4:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AccountScreen(),
           ),
         );
         break;
     }
+  }
+
+  Future<void> _loadFavoriteProductIds() async {
+    try {
+      _favoriteProductIds = await _favorites.loadListFavorites(); 
+      setState(() {}); 
+    } catch (e) {
+      print('Error loading favorite product IDs: $e');
+    }
+  }
+
+  Future<List<products>> _loadFavoriteProducts() async {
+    return await products.loadProductsByIds(_favoriteProductIds); 
   }
 
   @override
@@ -77,15 +96,15 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         title: Center(
           child: Text("Danh sách yêu thích"),
         ),
-          automaticallyImplyLeading: false,
-          actions: <Widget>[
+        automaticallyImplyLeading: false,
+        actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.shopping_cart_sharp, size: 22),
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => CartScreen(userId: "A"),
+                  builder: (context) => CartScreen(),
                 ),
               );
             },
@@ -94,7 +113,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
       ),
       
       body: FutureBuilder<List<products>>(
-        future: _favoriteProducts,
+        future: _loadFavoriteProducts(), 
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -104,17 +123,12 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
             return Center(child: Text('No favorite products found.'));
           } else {
             List<products> favoriteProducts = snapshot.data!;
-            return GridView.builder(
+            return ListView.builder(
               padding: EdgeInsets.all(8.0),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 8.0,
-                mainAxisSpacing: 8.0,
-              ),
               itemCount: favoriteProducts.length,
               itemBuilder: (context, index) {
                 products product = favoriteProducts[index];
-                return itemFavorite(product: product);
+                return ItemFavorite(product: product, favorites: _favorites); 
               },
             );
           }

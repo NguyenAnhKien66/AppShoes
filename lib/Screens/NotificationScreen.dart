@@ -2,22 +2,22 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shoesapp/Component/CustomBottomNav.dart';
 import 'package:shoesapp/Data/Invoices_reader.dart';
+import 'package:shoesapp/Data/shared_prefs_manager.dart';
+import 'package:shoesapp/Screens/AccountScreen.dart';
 import 'package:shoesapp/Screens/FavoritesScreen.dart';
 import 'package:shoesapp/Screens/HomeScreen.dart';
 import 'package:shoesapp/Screens/productCategoryScreen.dart';
 
 class NotificationScreen extends StatefulWidget {
-  final String userId;
-
-  const NotificationScreen({Key? key, required this.userId}) : super(key: key);
-
   @override
   _NotificationScreenState createState() => _NotificationScreenState();
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  late Future<List<Invoice>> _invoices;
+  late Stream<List<Invoice>> _invoiceStream;
   int _selectedIndex = 3; 
+  String userId = SharedPrefsManager.getUserId();
+
   void _onItemTapped(int index) {
     if (_selectedIndex == index) return;
     setState(() {
@@ -29,7 +29,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => HomeScreen(userId: "userId"), 
+            builder: (context) => HomeScreen(), 
           ),
         );
         break;
@@ -50,18 +50,18 @@ class _NotificationScreenState extends State<NotificationScreen> {
         );
         break;
       case 4:
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => AccountScreen(),
-        //   ),
-        // );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AccountScreen(),
+          ),
+        );
         break;
       case 3:
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => NotificationScreen(userId: 'A',),
+            builder: (context) => NotificationScreen(),
           ),
         );
         break;
@@ -71,20 +71,38 @@ class _NotificationScreenState extends State<NotificationScreen> {
   @override
   void initState() {
     super.initState();
-    _invoices = _loadInvoices();
+    _invoiceStream = _loadInvoices();
   }
 
-  Future<List<Invoice>> _loadInvoices() async {
+  Stream<List<Invoice>> _loadInvoices() {
     final firestore = FirebaseFirestore.instance;
-    final querySnapshot = await firestore
+    return firestore
         .collection('Invoices')
-        .where('userId', isEqualTo: widget.userId)
-        .get();
+        .where('userId', isEqualTo: userId)
+        .snapshots()
+        .map((querySnapshot) {
+      return querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        return Invoice.fromMap(data..['id'] = doc.id);
+      }).toList();
+    });
+  }
 
-    return querySnapshot.docs.map((doc) {
-      final data = doc.data();
-      return Invoice.fromMap(data..['id'] = doc.id);
-    }).toList();
+  String _getNotificationMessage(Invoice invoice) {
+    if (!invoice.status && !invoice.move && !invoice.finished && !invoice.cancel && !invoice.reInvoices) {
+      return 'Đơn hàng ${invoice.invoiceId} của bạn đang chờ xác nhận từ cửa hàng';
+    } else if (invoice.status && !invoice.move && !invoice.finished && !invoice.cancel && !invoice.reInvoices) {
+      return 'Đơn hàng ${invoice.invoiceId} của bạn đã được xác nhận từ cửa hàng';
+    } else if (invoice.status && invoice.move && !invoice.finished && !invoice.cancel && !invoice.reInvoices) {
+      return 'Đơn hàng ${invoice.invoiceId} của bạn đang được giao';
+    } else if (invoice.status && !invoice.move && invoice.finished && !invoice.cancel && !invoice.reInvoices) {
+      return 'Đơn hàng ${invoice.invoiceId} của bạn đã gửi đến bạn';
+    } else if (!invoice.status && !invoice.move && !invoice.finished && invoice.cancel && !invoice.reInvoices) {
+      return 'Đơn ${invoice.invoiceId} đã bị hủy';
+    } else if (!invoice.status && !invoice.move && !invoice.finished && !invoice.cancel && invoice.reInvoices) {
+      return 'Đơn ${invoice.invoiceId} đã được trả';
+    }
+    return '';
   }
 
   @override
@@ -96,8 +114,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
           child: Text("Thông báo"),
         )
       ),
-      body: FutureBuilder<List<Invoice>>(
-        future: _invoices,
+      body: StreamBuilder<List<Invoice>>(
+        stream: _invoiceStream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -112,17 +130,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
               itemBuilder: (context, index) {
                 final invoice = invoices[index];
                 return ListTile(
-                  title: invoice.status==true?Text('Đơn hàng ${invoice.invoiceId} của bạn đã được xác nhận từ cửa hàng'):Text('Đơn hàng ${invoice.invoiceId} của bạn đang chờ xác nhận từ cửa hàng'),
+                  title: Text(_getNotificationMessage(invoice)),
                   subtitle: Text(
-                    'Price: \$${invoice.totalAmountDue} \nNgày: ${invoice.time}',
+                    'Price: \$${invoice.totalAmountDue} \nNgày mua: ${invoice.time}',
                   ),
                   onTap: () {
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //     builder: (context) => InvoiceDetailScreen(invoiceId: invoice.id),
-                    //   ),
-                    // );
+                    // Handle tap if needed
                   },
                 );
               },

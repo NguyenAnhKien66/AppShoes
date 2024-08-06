@@ -3,13 +3,16 @@ import 'package:shoesapp/Component/CustomBottomNav.dart';
 import 'package:shoesapp/Component/DialogFillter.dart';
 
 import 'package:shoesapp/Component/ProductList.dart';
+import 'package:shoesapp/Data/shared_prefs_manager.dart';
+import 'package:shoesapp/Screens/AccountScreen.dart';
 import 'package:shoesapp/Screens/FavoritesScreen.dart';
 import 'package:shoesapp/Screens/HomeScreen.dart';
 import 'package:shoesapp/Screens/NotificationScreen.dart';
 import 'package:shoesapp/Screens/SearchScreen.dart';
 
 class ProductCategoryScreen extends StatefulWidget {
-  final String? searchTerm; 
+  final String? searchTerm;
+   
 
   ProductCategoryScreen({this.searchTerm});
 
@@ -21,7 +24,7 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> with Sing
   late TabController _tabController;
   Map<String, dynamic> _filters = {};
   int _selectedIndex = 2; 
-
+  String userId = SharedPrefsManager.getUserId();
   @override
   void initState() {
     super.initState();
@@ -39,7 +42,7 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> with Sing
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => HomeScreen(userId: "userId"), 
+            builder: (context) => HomeScreen(), 
           ),
         );
         break;
@@ -52,26 +55,21 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> with Sing
         );
         break;
       case 2:
+        
+        break;
+      case 4:
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => ProductCategoryScreen(searchTerm: widget.searchTerm),
+            builder: (context) => AccountScreen(),
           ),
         );
-        break;
-      case 4:
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => AccountScreen(),
-        //   ),
-        // );
         break;
       case 3:
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => NotificationScreen(userId: 'A',),
+            builder: (context) => NotificationScreen(),
           ),
         );
         break;
@@ -116,7 +114,7 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> with Sing
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => SearchScreen(),
+                  builder: (context) => SearchScreen(userId: userId),
                 ),
               );
             },

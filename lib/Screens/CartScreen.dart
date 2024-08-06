@@ -3,12 +3,13 @@ import 'package:shoesapp/Component/cart_item.dart';
 import 'package:shoesapp/Component/cart_summary.dart';
 import 'package:shoesapp/Data/carts_reader.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shoesapp/Data/shared_prefs_manager.dart';
 import 'package:shoesapp/Screens/PaymentScreen.dart';
 
 class CartScreen extends StatefulWidget {
-  final String userId;
+  
 
-  const CartScreen({super.key, required this.userId});
+  const CartScreen({super.key});
 
   @override
   State<CartScreen> createState() => _CartScreenState();
@@ -19,12 +20,12 @@ class _CartScreenState extends State<CartScreen> {
   late Future<List<CartItem>> _cartItemsFuture;
   List<CartItem> _cartItems = [];
   List<CartItem> _selectedItems = [];
-
+  String userId = SharedPrefsManager.getUserId();
   @override
   void initState() {
     super.initState();
     
-    _cartService = CartService(widget.userId);
+    _cartService = CartService(userId);
     _cartItemsFuture = _cartService.getCartItems();
     _cartItemsFuture.then((items) {
       setState(() {
@@ -39,7 +40,7 @@ class _CartScreenState extends State<CartScreen> {
       MaterialPageRoute(
         builder: (context) => PaymentScreen(
           selectedItems: _selectedItems,
-          userId: widget.userId,
+          userId: userId,
         ),
       ),
     );
@@ -105,25 +106,13 @@ class _CartScreenState extends State<CartScreen> {
 
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-         title: Center(
-          child: Text("Giỏ Hàng"),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.shopping_cart_sharp, size: 22),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => CartScreen(userId: "A"),
-                ),
-              );
-            },
-          ),
-        ],
+         title: 
+           Text("Giỏ Hàng"),
+          
       ),
       body: FutureBuilder<List<CartItem>>(
         future: _cartItemsFuture,
