@@ -1,18 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:shoesapp/Component/CustomBottomNav.dart';
 import 'package:shoesapp/Component/DialogFillter.dart';
-
 import 'package:shoesapp/Component/ProductList.dart';
 import 'package:shoesapp/Data/shared_prefs_manager.dart';
-import 'package:shoesapp/Screens/AccountScreen.dart';
-import 'package:shoesapp/Screens/FavoritesScreen.dart';
-import 'package:shoesapp/Screens/HomeScreen.dart';
-import 'package:shoesapp/Screens/NotificationScreen.dart';
-import 'package:shoesapp/Screens/SearchScreen.dart';
 
 class ProductCategoryScreen extends StatefulWidget {
   final String? searchTerm;
-   
 
   ProductCategoryScreen({this.searchTerm});
 
@@ -23,57 +15,12 @@ class ProductCategoryScreen extends StatefulWidget {
 class _ProductCategoryScreenState extends State<ProductCategoryScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   Map<String, dynamic> _filters = {};
-  int _selectedIndex = 2; 
   String userId = SharedPrefsManager.getUserId();
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
-  }
-
-  void _onItemTapped(int index) {
-    if (_selectedIndex == index) return;
-    setState(() {
-      _selectedIndex = index;
-    });
-    
-    switch (index) {
-      case 0:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomeScreen(), 
-          ),
-        );
-        break;
-      case 1:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => FavoriteScreen(),
-          ),
-        );
-        break;
-      case 2:
-        
-        break;
-      case 4:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => AccountScreen(),
-          ),
-        );
-        break;
-      case 3:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => NotificationScreen(),
-          ),
-        );
-        break;
-    }
   }
 
   void _openFilterDialog() async {
@@ -92,90 +39,94 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> with Sing
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        automaticallyImplyLeading: false,
-        title: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12.0),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.2),
-                spreadRadius: 2,
-                blurRadius: 5,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SearchScreen(userId: userId),
-                ),
-              );
-            },
+      body: Column(
+        children: [
+          Container(
+           padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            
+            decoration: BoxDecoration(
+              color: Colors.blueAccent,
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(16.0)),
+            ),
             child: Row(
               children: [
-                Icon(Icons.search, color: Colors.grey),
-                SizedBox(width: 8.0),
-                Text(
-                  'Tìm kiếm sản phẩm...',
-                  style: TextStyle(color: Colors.grey),
+                Expanded(
+                  child: TabBar(
+                    controller: _tabController,
+                    tabs: [
+                      Tab(
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Container(
+                            width: 80,
+                            child: Text('Tất cả', textAlign: TextAlign.center),
+                          ),
+                        ),
+                      ),
+                      Tab(
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Container(
+                            width: 80,
+                            child: Text('Nam', textAlign: TextAlign.center),
+                          ),
+                        ),
+                      ),
+                      Tab(
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Container(
+                            width: 80,
+                            child: Text('Nữ', textAlign: TextAlign.center),
+                          ),
+                        ),
+                      ),
+                      Tab(
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Container(
+                            width: 100,
+                            child: Text('Bé trai', textAlign: TextAlign.center),
+                          ),
+                        ),
+                      ),
+                      Tab(
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Container(
+                            width: 100,
+                            child: Text('Bé gái', textAlign: TextAlign.center),
+                          ),
+                        ),
+                      ),
+                    ],
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    indicatorPadding: EdgeInsets.zero,
+                    unselectedLabelColor: Colors.grey,
+                    labelColor: Colors.white,
+                    indicatorColor: Colors.white,
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.filter_list, color: Colors.white),
+                  onPressed: _openFilterDialog,
                 ),
               ],
             ),
           ),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.filter_list),
-            onPressed: _openFilterDialog,
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                ProductList(sex: 'Tất cả', filters: _filters, searchTerm: widget.searchTerm),
+                ProductList(sex: 'Nam', filters: _filters, searchTerm: widget.searchTerm),
+                ProductList(sex: 'Nữ', filters: _filters, searchTerm: widget.searchTerm),
+                ProductList(sex: 'Bé trai', filters: _filters, searchTerm: widget.searchTerm),
+                ProductList(sex: 'Bé gái', filters: _filters, searchTerm: widget.searchTerm),
+              ],
+            ),
           ),
         ],
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(kToolbarHeight),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: TabBar(
-                  controller: _tabController,
-                  isScrollable: true,
-                  tabs: const [
-                    Tab(text: 'Tất cả'),
-                    Tab(text: 'Nam'),
-                    Tab(text: 'Nữ'),
-                    Tab(text: 'Bé trai'),
-                    Tab(text: 'Bé gái'),
-                  ],
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  indicatorPadding: EdgeInsets.zero,
-                  unselectedLabelColor: Colors.grey,
-                  labelColor: Colors.black,
-                  indicatorColor: Colors.blue,
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          ProductList(sex: 'Tất cả', filters: _filters, searchTerm: widget.searchTerm),
-          ProductList(sex: 'Nam', filters: _filters, searchTerm: widget.searchTerm),
-          ProductList(sex: 'Nữ', filters: _filters, searchTerm: widget.searchTerm),
-          ProductList(sex: 'Bé trai', filters: _filters, searchTerm: widget.searchTerm),
-          ProductList(sex: 'Bé gái', filters: _filters, searchTerm: widget.searchTerm),
-        ],
-      ),
-      bottomNavigationBar: CustomBottomAppBar(
-        selectedIndex: _selectedIndex,
-        onItemTapped: _onItemTapped,
       ),
     );
   }

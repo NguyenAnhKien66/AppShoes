@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shoesapp/Data/shared_prefs_manager.dart';
+import 'package:shoesapp/Screens/ControllerPage.dart';
 import 'package:shoesapp/Screens/productCategoryScreen.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -13,7 +14,7 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   TextEditingController _searchController = TextEditingController();
   List<String> _hotKeywords = ['Giày sandal', 'Dép', 'Phụ kiện']; 
-  List<String> _searchHistory = [];
+  List<String>  _searchHistory = [];
   String userId = SharedPrefsManager.getUserId();
   @override
   void initState() {
@@ -37,17 +38,17 @@ class _SearchScreenState extends State<SearchScreen> {
         SharedPrefsManager.saveStringList('search_keywords', _searchHistory);
       }
     });
-    _searchController.clear();
+    // _searchController.clear();
 
-    
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ProductCategoryScreen(searchTerm: keyword),
+        builder: (context) => ControllerPage(searchTerm: keyword),
       ),
     );
   }
 }
+
 
   void _deleteSearchKeyword(String keyword) {
     setState(() {

@@ -9,7 +9,7 @@ class users {
   final String phoneNumber;
   final String gender;
   final String dateOfBirth;
-  final String imageUrl;
+  late String imageUrl; 
   final bool status;
 
   users({

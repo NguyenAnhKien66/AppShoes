@@ -1,7 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:shoesapp/Data/shared_prefs_manager.dart';
-import 'package:shoesapp/Screens/HomeScreen.dart';
 import 'package:shoesapp/Screens/Login.dart';
 import 'package:shoesapp/firebase_options.dart';
 

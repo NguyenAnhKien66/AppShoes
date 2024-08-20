@@ -99,10 +99,19 @@ class SharedPrefsManager {
   }
 
   // Lấy mật khẩu
-  static String getPassword(String s) {
+  static String getPassword() {
     return getString('password', '');
   }
 
+  // Lưu phone
+  static Future<void> savePhone(String Phone) async {
+    await _prefs.setString('Phone', Phone);
+  }
+
+  // Lấy phone
+  static String getPhone() {
+    return getString('Phone', '');
+  }
   // Lưu hình ảnh
   static Future<void> saveImageUrl(String imageUrl) async {
     await _prefs.setString('imageUrl', imageUrl);

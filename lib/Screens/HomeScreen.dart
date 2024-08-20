@@ -5,12 +5,11 @@ import 'package:shoesapp/Component/HorizontalProductList.dart';
 import 'package:shoesapp/Data/Products_reader.dart';
 import 'package:shoesapp/Data/shared_prefs_manager.dart';
 import 'package:shoesapp/Screens/AccountScreen.dart';
-import 'package:shoesapp/Screens/CartScreen.dart';
+
 import 'package:shoesapp/Screens/FavoritesScreen.dart';
 import 'package:shoesapp/Screens/NotificationScreen.dart';
 import 'package:shoesapp/Screens/ProductCategoryScreen.dart';
-import 'package:shoesapp/Component/CustomBottomNav.dart';
-import 'package:shoesapp/Screens/SearchScreen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -76,58 +75,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        automaticallyImplyLeading: false,
-        title: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12.0),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.2),
-                spreadRadius: 2,
-                blurRadius: 5,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SearchScreen(userId: userId),
-                ),
-              );
-            },
-            child: Row(
-              children: [
-                Icon(Icons.search, color: Colors.grey),
-                SizedBox(width: 8.0),
-                Text(
-                  'Search for products...',
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ],
-            ),
-          ),
-        ),
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.shopping_cart_sharp, size: 22),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => CartScreen(),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
       body: Stack(
         children: [
           Column(
@@ -172,10 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
           BackToTopButton(scrollController: _scrollController),
         ],
       ),
-      bottomNavigationBar: CustomBottomAppBar(
-        selectedIndex: _selectedIndex,
-        onItemTapped: _onItemTapped,
-      ),
+     
     );
   }
 }

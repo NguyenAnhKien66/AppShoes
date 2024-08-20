@@ -8,6 +8,7 @@ class InformationAccount extends StatefulWidget {
 }
 
 class _InformationAccountState extends State<InformationAccount> {
+  
   @override
   Widget build(BuildContext context) {
      String Username = SharedPrefsManager.getUsername();
@@ -21,7 +22,7 @@ class _InformationAccountState extends State<InformationAccount> {
           children: [
             CircleAvatar(
               radius: 30,
-              backgroundImage: AssetImage('assets/account.png'),
+              backgroundImage: img.isNotEmpty? NetworkImage(img):AssetImage('assets/account.png'),
             ),
             SizedBox(width: 10),
             Column(

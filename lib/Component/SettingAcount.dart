@@ -5,6 +5,10 @@ import 'package:shoesapp/Data/shared_prefs_manager.dart';
 import 'package:shoesapp/Screens/ProfileUser.dart';
 
 class SettingsAccount extends StatelessWidget {
+  final Future<void> Function() onProfileEdit;
+
+  SettingsAccount({required this.onProfileEdit});
+
   Future<void> _logout(BuildContext context) async {
     try {
       await SharedPrefsManager.clearPreferences();
@@ -17,7 +21,6 @@ class SettingsAccount extends StatelessWidget {
       );
     } catch (e) {
       print('Lỗi khi đăng xuất: $e');
-      
     }
   }
 
@@ -30,24 +33,19 @@ class SettingsAccount extends StatelessWidget {
           ListTile(
             title: Text('Chỉnh sửa hồ sơ'),
             onTap: () {
-             Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => UserProfilePage(),
-        ),
-      );
+              onProfileEdit(); 
             },
           ),
           ListTile(
             title: Text('Cài đặt'),
             onTap: () {
-              
+              // Xử lý cài đặt tại đây
             },
           ),
           ListTile(
             title: Text('Yêu cầu hủy tài khoản'),
             onTap: () {
-              
+              // Xử lý yêu cầu hủy tài khoản tại đây
             },
           ),
           ListTile(

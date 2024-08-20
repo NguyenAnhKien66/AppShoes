@@ -1,12 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:shoesapp/Component/CustomBottomNav.dart';
 import 'package:shoesapp/Data/Invoices_reader.dart';
 import 'package:shoesapp/Data/shared_prefs_manager.dart';
-import 'package:shoesapp/Screens/AccountScreen.dart';
-import 'package:shoesapp/Screens/FavoritesScreen.dart';
-import 'package:shoesapp/Screens/HomeScreen.dart';
-import 'package:shoesapp/Screens/productCategoryScreen.dart';
 
 class NotificationScreen extends StatefulWidget {
   @override
@@ -15,58 +10,10 @@ class NotificationScreen extends StatefulWidget {
 
 class _NotificationScreenState extends State<NotificationScreen> {
   late Stream<List<Invoice>> _invoiceStream;
-  int _selectedIndex = 3; 
+  
   String userId = SharedPrefsManager.getUserId();
 
-  void _onItemTapped(int index) {
-    if (_selectedIndex == index) return;
-    setState(() {
-      _selectedIndex = index;
-    });
-    
-    switch (index) {
-      case 0:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomeScreen(), 
-          ),
-        );
-        break;
-      case 1:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => FavoriteScreen(),
-          ),
-        );
-        break;
-      case 2:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProductCategoryScreen(),
-          ),
-        );
-        break;
-      case 4:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => AccountScreen(),
-          ),
-        );
-        break;
-      case 3:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => NotificationScreen(),
-          ),
-        );
-        break;
-    }
-  }
+  
 
   @override
   void initState() {
@@ -108,12 +55,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Center(
-          child: Text("Thông báo"),
-        )
-      ),
+      
       body: StreamBuilder<List<Invoice>>(
         stream: _invoiceStream,
         builder: (context, snapshot) {
@@ -143,10 +85,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           }
         },
       ),
-      bottomNavigationBar: CustomBottomAppBar(
-        selectedIndex: _selectedIndex,
-        onItemTapped: _onItemTapped,
-      ),
+      
     );
   }
 }

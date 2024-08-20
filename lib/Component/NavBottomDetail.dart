@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shoesapp/Component/ButtomAddtoCart.dart';
 import 'package:shoesapp/Data/Favorites_reader.dart';
 import 'package:shoesapp/Data/Products_reader.dart';
 import 'package:shoesapp/Data/carts_reader.dart';
@@ -7,7 +8,7 @@ class nav_bottom_detail extends StatefulWidget {
   final VoidCallback onAddToCart;
   final VoidCallback onFavoriteToggle;
  final bool isFavorite;
-
+  
   const nav_bottom_detail({
     super.key,
     required this.onAddToCart, required this.onFavoriteToggle, required this.isFavorite});
@@ -24,7 +25,7 @@ class _nav_bottom_detailState extends State<nav_bottom_detail> {
     double screenWidth = MediaQuery.of(context).size.width;
     double buttonWidth = screenWidth * 0.8;
     double buttonHeight = MediaQuery.of(context).size.height * 0.07;
-
+    
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       decoration: BoxDecoration(
@@ -37,37 +38,27 @@ class _nav_bottom_detailState extends State<nav_bottom_detail> {
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           IconButton(
             icon: Icon(
-              widget.isFavorite ? Icons.favorite : Icons.favorite_border, // THAY ĐỔI
-              color: widget.isFavorite ? Colors.red : Colors.grey, // THAY ĐỔI
+              widget.isFavorite ? Icons.favorite : Icons.favorite_border, 
+              color: widget.isFavorite ? Colors.red : Colors.grey,
             ),
-            onPressed: widget.onFavoriteToggle, // THAY ĐỔI
+            onPressed: widget.onFavoriteToggle, 
           ),
-          ElevatedButton(
-            onPressed: () {
-               // Gọi hàm thêm sản phẩm vào giỏ hàng
-              widget.onAddToCart(); // Gọi hàm thêm vào giỏ hàng từ widget cha
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              minimumSize: Size(buttonWidth, buttonHeight),
-            ),
-            child: Container(
-              child: const Row(
-                children: [
-                  Icon(Icons.shopping_cart_outlined, color: Colors.white),
-                  SizedBox(width: 20),
-                  Text(
-                    'Thêm vào giỏ hàng',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          
+          // ElevatedButton(
+          //   onPressed: () {
+          //      // Gọi hàm thêm sản phẩm vào giỏ hàng
+          //     widget.onAddToCart(); // Gọi hàm thêm vào giỏ hàng từ widget cha
+          //   },
+          //   style: ElevatedButton.styleFrom(
+          //     backgroundColor: Colors.blue,
+          //     minimumSize: Size(buttonWidth, buttonHeight),
+          //   ),
+            ButtomAddtoCart(onAddToCart:widget.onAddToCart, )
+          
         ],
       ),
     );

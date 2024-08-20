@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shoesapp/Data/shared_prefs_manager.dart';
 
 class ChangeName extends StatefulWidget {
